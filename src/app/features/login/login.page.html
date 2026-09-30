@@ -1,0 +1,61 @@
+<main class="login">
+  <mat-card appearance="outlined" class="login-card">
+    <mat-card-header>
+      <mat-icon mat-card-avatar class="brand-icon" aria-hidden="true">radar</mat-icon>
+      <mat-card-title><h1>Lead Catcher</h1></mat-card-title>
+      <mat-card-subtitle>Panel de administración</mat-card-subtitle>
+    </mat-card-header>
+
+    @if (loginForm().submitting()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Iniciando sesión" />
+    }
+
+    <form [formRoot]="loginForm" novalidate>
+      <mat-card-content>
+        <div class="error" role="alert">
+          @if (loginForm().errors()[0]; as err) {
+            <mat-icon aria-hidden="true">error</mat-icon>
+            <span>{{ err.message }}</span>
+          }
+        </div>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Email</mat-label>
+          <input matInput type="email" autocomplete="username" [formField]="loginForm.email" />
+          @if (loginForm.email().errors()[0]; as err) {
+            <mat-error>{{ err.message }}</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Contraseña</mat-label>
+          <input
+            matInput
+            [type]="hidePassword() ? 'password' : 'text'"
+            autocomplete="current-password"
+            [formField]="loginForm.password"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="hidePassword.set(!hidePassword())"
+            [attr.aria-label]="hidePassword() ? 'Mostrar contraseña' : 'Ocultar contraseña'"
+            [attr.aria-pressed]="!hidePassword()"
+          >
+            <mat-icon aria-hidden="true">{{
+              hidePassword() ? 'visibility' : 'visibility_off'
+            }}</mat-icon>
+          </button>
+          @if (loginForm.password().errors()[0]; as err) {
+            <mat-error>{{ err.message }}</mat-error>
+          }
+        </mat-form-field>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-flat-button type="submit" [disabled]="loginForm().submitting()">Entrar</button>
+      </mat-card-actions>
+    </form>
+  </mat-card>
+</main>

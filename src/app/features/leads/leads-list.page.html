@@ -1,0 +1,166 @@
+<header class="page-header">
+  <h1>Leads</h1>
+  <button mat-stroked-button type="button" (click)="exportCsv()" [disabled]="exporting()">
+    <mat-icon aria-hidden="true">download</mat-icon>
+    {{ exporting() ? 'Exportando…' : 'Exportar CSV' }}
+  </button>
+</header>
+
+<section class="filters" aria-label="Filtros">
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="search">
+    <mat-label>Buscar</mat-label>
+    <mat-icon matIconPrefix aria-hidden="true">search</mat-icon>
+    <input
+      matInput
+      type="search"
+      placeholder="Nombre, email o empresa"
+      [value]="q() ?? ''"
+      #search
+      (input)="onSearch(search.value)"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Estado</mat-label>
+    <mat-select [value]="statusValue() ?? null" (selectionChange)="onStatus($event.value)">
+      <mat-option [value]="null">Todos</mat-option>
+      @for (option of statusOptions; track option.value) {
+        <mat-option [value]="option.value">{{ option.label }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Fuente</mat-label>
+    <input matInput #sourceInput [value]="source() ?? ''" (change)="onSource(sourceInput.value)" />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" subscriptSizing="dynamic">
+    <mat-label>Fecha de alta</mat-label>
+    <mat-date-range-input [rangePicker]="picker">
+      <input
+        matStartDate
+        placeholder="Desde"
+        [value]="fromDate()"
+        (dateChange)="onFrom($event.value)"
+      />
+      <input matEndDate placeholder="Hasta" [value]="toDate()" (dateChange)="onTo($event.value)" />
+    </mat-date-range-input>
+    <mat-datepicker-toggle matIconSuffix [for]="picker" />
+    <mat-date-range-picker #picker />
+  </mat-form-field>
+
+  @if (hasFilters()) {
+    <button mat-button type="button" (click)="clearFilters()">
+      <mat-icon aria-hidden="true">filter_alt_off</mat-icon>
+      Limpiar filtros
+    </button>
+  }
+</section>
+
+<app-error-banner
+  [error]="leads.error()"
+  fallback="No se pudieron cargar los leads."
+  (retry)="leads.reload()"
+/>
+
+<div class="table-card">
+  <div class="progress-slot">
+    @if (leads.isLoading()) {
+      <mat-progress-bar mode="indeterminate" aria-label="Cargando leads" />
+    }
+  </div>
+
+  <div class="table-scroll">
+    <table
+      mat-table
+      [dataSource]="rows()"
+      matSort
+      [matSortActive]="sortValue()"
+      [matSortDirection]="orderValue()"
+      matSortDisableClear
+      (matSortChange)="onSort($event)"
+      aria-label="Listado de leads"
+    >
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef scope="col">Nombre</th>
+        <td mat-cell *matCellDef="let lead">
+          <a class="lead-link" [routerLink]="['/leads', lead.id]">{{ lead.name }}</a>
+          @if (lead.company) {
+            <div class="secondary">{{ lead.company }}</div>
+          }
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="email">
+        <th mat-header-cell *matHeaderCellDef scope="col">Email</th>
+        <td mat-cell *matCellDef="let lead">{{ lead.email }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell *matHeaderCellDef scope="col">Estado</th>
+        <td mat-cell *matCellDef="let lead"><app-status-badge [status]="lead.status" /></td>
+      </ng-container>
+
+      <ng-container matColumnDef="source">
+        <th mat-header-cell *matHeaderCellDef scope="col">Fuente</th>
+        <td mat-cell *matCellDef="let lead">{{ lead.source ?? '—' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="submissionCount">
+        <th mat-header-cell *matHeaderCellDef scope="col" class="numeric">Envíos</th>
+        <td mat-cell *matCellDef="let lead" class="numeric">{{ lead.submissionCount }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="createdAt">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          scope="col"
+          sortActionDescription="Ordenar por fecha de alta"
+        >
+          Alta
+        </th>
+        <td mat-cell *matCellDef="let lead">{{ lead.createdAt | date: 'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="lastSubmittedAt">
+        <th
+          mat-header-cell
+          *matHeaderCellDef
+          mat-sort-header
+          scope="col"
+          sortActionDescription="Ordenar por último envío"
+        >
+          Último envío
+        </th>
+        <td mat-cell *matCellDef="let lead">{{ lead.lastSubmittedAt | date: 'short' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="columns; sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: columns"></tr>
+      <tr class="mat-mdc-row" *matNoDataRow>
+        <td class="mat-mdc-cell empty" [attr.colspan]="columns.length">
+          @if (leads.isLoading()) {
+            Cargando…
+          } @else if (hasFilters()) {
+            Ningún lead coincide con los filtros.
+          } @else {
+            Todavía no hay leads.
+          }
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <mat-paginator
+    [length]="total()"
+    [pageIndex]="page() - 1"
+    [pageSize]="limit()"
+    [pageSizeOptions]="pageSizes"
+    showFirstLastButtons
+    (page)="onPage($event)"
+    aria-label="Paginación de leads"
+  />
+</div>

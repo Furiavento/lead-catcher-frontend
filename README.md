@@ -1,59 +1,75 @@
-# LeadCatcherFrontend
+# Lead Catcher – Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.0.
+Panel de administración (Angular 22 + Angular Material, SSR con Express) para la API de Lead Catcher.
 
-## Development server
+## Funcionalidades
 
-To start a local development server, run:
+- **Login** con JWT (guardado en `localStorage`; el logout descarta el token).
+- **Resumen**: totales por estado, tasa de conversión, leads por día y principales fuentes para un periodo (7/30/90 días o rango personalizado, agrupado en la zona horaria del navegador).
+- **Leads**: búsqueda, filtros por estado/fuente/fecha, orden, paginación en servidor y exportación CSV. Los filtros viven en la URL.
+- **Detalle**: datos de contacto, origen/UTM, consentimiento, cambio de estado, edición, borrado y notas.
+- **Cambio de contraseña** desde el menú de usuario.
 
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Desarrollo local
 
 ```bash
-ng generate component component-name
+npm install
+npm start            # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+El backend debe estar en `http://localhost:3000` con `CORS_ORIGINS=http://localhost:4200`. Para apuntar a otra API: `API_URL=https://... npm start`.
 
 ```bash
-ng generate --help
+npm test             # tests unitarios (Vitest)
+npm run build        # build de producción en dist/
+npm run api:types    # regenera src/app/core/api/schema.d.ts desde la API local
 ```
 
-## Building
+### Tipos de la API
 
-To build the project run:
+Los tipos (`Lead`, `LeadStats`, filtros…) se generan del OpenAPI del backend con `openapi-typescript` y se exponen con nombres cortos en `core/api/models.ts`. Tras cambiar un DTO en el backend, con este arrancado:
 
 ```bash
-ng build
+npm run api:types                                   # usa http://localhost:3000/api/docs-json
+API_DOCS_URL=https://api.tudominio.com/api/docs-json npm run api:types
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+Si el cambio rompe algo en el frontend, el build falla. `openapi-typescript` se ejecuta con `npx` en vez de instalarse porque aún declara `typescript@^5` como peer y el proyecto usa TS 6.
 
-## Running unit tests
+## Configuración en runtime
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+La URL de la API **no se compila** en el bundle: el servidor SSR la expone en `GET /config.json` a partir de sus variables de entorno y la app la carga al arrancar. Una misma imagen sirve para cualquier entorno. Ver `.env.example`:
 
-```bash
-ng test
+| Variable | Descripción |
+|---|---|
+| `PORT` | Puerto del servidor (por defecto `4000` en la imagen) |
+| `API_URL` | URL **pública** de la API con el prefijo `/api`, p. ej. `https://api.tudominio.com/api`. La llama el navegador, así que no sirve un hostname interno de Docker |
+| `NG_ALLOWED_HOSTS` | Dominios (separados por comas) a los que responde el servidor. Protección SSRF de Angular: cualquier otro `Host` recibe un 400 |
+
+> Igual que en el backend: en Dokploy escribe `KEY=value` **sin comillas**.
+
+## Despliegue en Dokploy
+
+Frontend y backend son dos aplicaciones (contenedores) independientes.
+
+1. Crea una aplicación con build type **Dockerfile** apuntando a este repo.
+2. En *Environment*:
+   ```
+   API_URL=https://api.tudominio.com/api
+   NG_ALLOWED_HOSTS=panel.tudominio.com
+   ```
+3. Configura el dominio (`panel.tudominio.com`) con el puerto `4000`.
+4. En el **backend**, añade el dominio del frontend a `CORS_ORIGINS` (p. ej. `CORS_ORIGINS=https://panel.tudominio.com`) y reinícialo.
+
+La imagen solo contiene `dist/` (el bundle del servidor no necesita `node_modules`), corre como usuario `node` e incluye un healthcheck sobre `/config.json`.
+
+## Estructura
+
+```
+src/app/
+  core/       config runtime, auth (servicio, interceptor, guards), clientes de la API
+  shared/     estado del lead, diálogos, banner de error, notificaciones, fechas, descargas
+  features/   login, layout (shell), dashboard, leads, account
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Todas las rutas se renderizan en cliente (`RenderMode.Client`), ya que dependen del token del navegador. Un futuro formulario público puede usar `Prerender` o `Server` en `app.routes.server.ts`.

@@ -1,0 +1,197 @@
+<nav class="back" aria-label="Migas de pan">
+  <a mat-button routerLink="/leads">
+    <mat-icon aria-hidden="true">arrow_back</mat-icon>
+    Volver a leads
+  </a>
+</nav>
+
+@if (lead.isLoading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando lead" />
+}
+
+<app-error-banner
+  [error]="lead.error()"
+  fallback="No se pudo cargar el lead."
+  (retry)="lead.reload()"
+/>
+
+@if (lead.value(); as l) {
+  <header class="page-header">
+    <div>
+      <h1>{{ l.name }}</h1>
+      <p class="subtitle">
+        <app-status-badge [status]="l.status" />
+        @if (l.company) {
+          <span>{{ l.company }}</span>
+        }
+      </p>
+    </div>
+    <div class="actions">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" class="status-field">
+        <mat-label>Estado</mat-label>
+        <mat-select
+          [value]="l.status"
+          [disabled]="savingStatus()"
+          (selectionChange)="changeStatus($event.value)"
+        >
+          @for (option of statusOptions; track option.value) {
+            <mat-option [value]="option.value">{{ option.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="edit()">
+        <mat-icon aria-hidden="true">edit</mat-icon>
+        Editar
+      </button>
+      <button mat-stroked-button type="button" class="danger" (click)="remove()">
+        <mat-icon aria-hidden="true">delete</mat-icon>
+        Eliminar
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <div class="column">
+      <mat-card appearance="outlined">
+        <mat-card-header
+          ><mat-card-title><h2>Contacto</h2></mat-card-title></mat-card-header
+        >
+        <mat-card-content>
+          <dl class="details">
+            <dt>Email</dt>
+            <dd>
+              <a [href]="'mailto:' + l.email">{{ l.email }}</a>
+            </dd>
+            <dt>Teléfono</dt>
+            <dd>
+              @if (l.phone) {
+                <a [href]="'tel:' + l.phone">{{ l.phone }}</a>
+              } @else {
+                —
+              }
+            </dd>
+            <dt>Empresa</dt>
+            <dd>{{ l.company ?? '—' }}</dd>
+            <dt>Alta</dt>
+            <dd>{{ l.createdAt | date: 'medium' }}</dd>
+            <dt>Último envío</dt>
+            <dd>{{ l.lastSubmittedAt | date: 'medium' }}</dd>
+            <dt>Envíos</dt>
+            <dd>{{ l.submissionCount }}</dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      @if (l.message) {
+        <mat-card appearance="outlined">
+          <mat-card-header
+            ><mat-card-title><h2>Mensaje</h2></mat-card-title></mat-card-header
+          >
+          <mat-card-content>
+            <p class="message">{{ l.message }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+
+      <mat-card appearance="outlined">
+        <mat-card-header
+          ><mat-card-title><h2>Origen</h2></mat-card-title></mat-card-header
+        >
+        <mat-card-content>
+          <dl class="details">
+            <dt>Fuente</dt>
+            <dd>{{ l.source ?? '—' }}</dd>
+            <dt>Landing</dt>
+            <dd class="break">
+              @if (l.landingUrl) {
+                <a [href]="l.landingUrl" target="_blank" rel="noopener noreferrer">
+                  {{ l.landingUrl }}
+                  <span class="visually-hidden">(se abre en una pestaña nueva)</span>
+                </a>
+              } @else {
+                —
+              }
+            </dd>
+            @for (item of utm(); track item.label) {
+              <dt>{{ item.label }}</dt>
+              <dd>{{ item.value }}</dd>
+            }
+          </dl>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card appearance="outlined">
+        <mat-card-header
+          ><mat-card-title><h2>Consentimiento</h2></mat-card-title></mat-card-header
+        >
+        <mat-card-content>
+          <dl class="details">
+            <dt>Aceptado</dt>
+            <dd>{{ l.consentAt ? (l.consentAt | date: 'medium') : 'No registrado' }}</dd>
+            <dt>Versión política</dt>
+            <dd>{{ l.privacyPolicyVersion ?? '—' }}</dd>
+            <dt>IP</dt>
+            <dd>{{ l.ip ?? '—' }}</dd>
+            <dt>User agent</dt>
+            <dd class="break small">{{ l.userAgent ?? '—' }}</dd>
+          </dl>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <mat-card appearance="outlined" class="notes-card">
+      <mat-card-header
+        ><mat-card-title><h2>Notas</h2></mat-card-title></mat-card-header
+      >
+      <mat-card-content>
+        <form [formRoot]="noteForm" novalidate class="note-form">
+          <mat-form-field appearance="outline">
+            <mat-label>Nueva nota</mat-label>
+            <textarea matInput rows="3" [formField]="noteForm.body"></textarea>
+            @if (noteForm.body().touched() && noteForm.body().errors()[0]; as err) {
+              <mat-error>{{ err.message }}</mat-error>
+            }
+          </mat-form-field>
+          <button mat-flat-button type="submit" [disabled]="noteForm().submitting()">
+            Añadir nota
+          </button>
+        </form>
+
+        @if (notes().length) {
+          <ol class="timeline" aria-label="Historial de notas">
+            @for (note of notes(); track note.id) {
+              <li [class.system]="note.kind === 'system'">
+                <mat-icon class="kind-icon" aria-hidden="true">
+                  {{ note.kind === 'system' ? 'settings' : 'sticky_note_2' }}
+                </mat-icon>
+                <div class="note-body">
+                  <div class="note-meta">
+                    <span>{{ note.kind === 'system' ? 'Sistema' : 'Nota' }}</span>
+                    ·
+                    <time [attr.datetime]="note.createdAt">{{
+                      note.createdAt | date: 'medium'
+                    }}</time>
+                  </div>
+                  <p>{{ note.body }}</p>
+                </div>
+                @if (note.kind === 'manual') {
+                  <button
+                    mat-icon-button
+                    type="button"
+                    (click)="removeNote(note)"
+                    aria-label="Eliminar nota"
+                    matTooltip="Eliminar nota"
+                  >
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                }
+              </li>
+            }
+          </ol>
+        } @else {
+          <p class="empty">Sin notas todavía.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

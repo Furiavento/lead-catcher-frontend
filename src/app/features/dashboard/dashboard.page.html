@@ -1,0 +1,92 @@
+<header class="page-header">
+  <h1>Resumen</h1>
+  <div class="range">
+    <mat-button-toggle-group
+      hideSingleSelectionIndicator
+      aria-label="Periodo rápido"
+      [value]="preset()"
+      (change)="applyPreset($event.value)"
+    >
+      @for (days of presets; track days) {
+        <mat-button-toggle [value]="days">{{ days }} días</mat-button-toggle>
+      }
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Periodo</mat-label>
+      <mat-date-range-input [rangePicker]="picker" [max]="today">
+        <input
+          matStartDate
+          placeholder="Desde"
+          [value]="start()"
+          (dateChange)="setStart($event.value)"
+        />
+        <input matEndDate placeholder="Hasta" [value]="end()" (dateChange)="setEnd($event.value)" />
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-date-range-picker #picker />
+    </mat-form-field>
+  </div>
+</header>
+
+@if (stats.isLoading()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Cargando métricas" />
+}
+
+<app-error-banner
+  [error]="stats.error()"
+  fallback="No se pudieron cargar las métricas."
+  (retry)="stats.reload()"
+/>
+
+@if (stats.value(); as data) {
+  <section class="tiles" aria-label="Totales">
+    <mat-card appearance="outlined" class="tile total">
+      <mat-card-content>
+        <span class="tile-label">Leads totales</span>
+        <span class="tile-value">{{ data.total }}</span>
+        @if (conversionRate(); as rate) {
+          <span class="tile-extra">Conversión {{ rate }}</span>
+        }
+      </mat-card-content>
+    </mat-card>
+    @for (tile of statusTiles(); track tile.status) {
+      <a
+        class="tile-link"
+        [routerLink]="['/leads']"
+        [queryParams]="{ status: tile.status }"
+        [attr.aria-label]="tile.label + ': ' + tile.count + ' leads. Ver listado'"
+      >
+        <mat-card appearance="outlined" class="tile">
+          <mat-card-content>
+            <span class="tile-label">
+              <span class="dot status-{{ tile.status }}" aria-hidden="true"></span>
+              {{ tile.label }}
+            </span>
+            <span class="tile-value">{{ tile.count }}</span>
+          </mat-card-content>
+        </mat-card>
+      </a>
+    }
+  </section>
+
+  <section class="panels">
+    <mat-card appearance="outlined" class="panel wide">
+      <mat-card-header>
+        <mat-card-title><h2>Leads por día</h2></mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-daily-chart [data]="data.daily" />
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="panel">
+      <mat-card-header>
+        <mat-card-title><h2>Principales fuentes</h2></mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-source-bars [data]="data.bySource" />
+      </mat-card-content>
+    </mat-card>
+  </section>
+}

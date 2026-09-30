@@ -1,0 +1,82 @@
+.range {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 16px;
+  margin: 16px 0 24px;
+}
+
+.tile-link {
+  text-decoration: none;
+  color: inherit;
+  border-radius: 12px;
+}
+
+.tile-link:hover .tile {
+  background: var(--mat-sys-surface-container-low);
+}
+
+.tile {
+  height: 100%;
+}
+
+.tile mat-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 16px;
+}
+
+.tile.total {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.tile-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: var(--mat-sys-label-large);
+}
+
+.tile-value {
+  font: var(--mat-sys-display-small);
+}
+
+.tile-extra {
+  font: var(--mat-sys-body-small);
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--status-color);
+}
+
+.panels {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1099.98px) {
+  .panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel h2 {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+}
+
+.panel mat-card-content {
+  padding-top: 16px;
+}

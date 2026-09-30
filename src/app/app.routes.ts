@@ -1,3 +1,38 @@
 import { Routes } from '@angular/router';
+import { authGuard, guestGuard } from './core/auth/auth.guard';
 
-export const routes: Routes = [];
+export const routes: Routes = [
+  {
+    path: 'login',
+    title: 'Iniciar sesión · Lead Catcher',
+    canActivate: [guestGuard],
+    loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
+  },
+  {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () => import('./features/layout/shell').then((m) => m.Shell),
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard',
+        title: 'Resumen · Lead Catcher',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+      },
+      {
+        path: 'leads',
+        title: 'Leads · Lead Catcher',
+        loadComponent: () =>
+          import('./features/leads/leads-list.page').then((m) => m.LeadsListPage),
+      },
+      {
+        path: 'leads/:id',
+        title: 'Detalle del lead · Lead Catcher',
+        loadComponent: () =>
+          import('./features/leads/lead-detail.page').then((m) => m.LeadDetailPage),
+      },
+    ],
+  },
+  { path: '**', redirectTo: 'dashboard' },
+];

@@ -13,16 +13,13 @@ const app = express();
 const angularApp = new AngularNodeAppEngine();
 
 /**
- * Example Express Rest API endpoints can be defined here.
- * Uncomment and define endpoints as necessary.
- *
- * Example:
- * ```ts
- * app.get('/api/{*splat}', (req, res) => {
- *   // Handle API request
- * });
- * ```
+ * Runtime configuration for the browser. API_URL is read on every request so
+ * the same image works in any environment (Dokploy only needs a restart).
  */
+app.get('/config.json', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ apiUrl: process.env['API_URL'] || 'http://localhost:3000/api' });
+});
 
 /**
  * Serve static files from /browser
@@ -41,9 +38,7 @@ app.use(
 app.use((req, res, next) => {
   angularApp
     .handle(req)
-    .then((response) =>
-      response ? writeResponseToNodeResponse(response, res) : next(),
-    )
+    .then((response) => (response ? writeResponseToNodeResponse(response, res) : next()))
     .catch(next);
 });
 
@@ -53,13 +48,19 @@ app.use((req, res, next) => {
  */
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
-  app.listen(port, (error) => {
+  const server = app.listen(port, (error) => {
     if (error) {
       throw error;
     }
 
     console.log(`Node Express server listening on http://localhost:${port}`);
   });
+
+  // Node as PID 1 in Docker ignores SIGTERM unless handled, so Dokploy would
+  // wait for the timeout and kill the container.
+  for (const signal of ['SIGTERM', 'SIGINT'] as const) {
+    process.once(signal, () => server.close(() => process.exit(0)));
+  }
 }
 
 /**

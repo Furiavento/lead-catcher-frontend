@@ -1,0 +1,138 @@
+.back {
+  margin: -8px 0 8px -12px;
+}
+
+.subtitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 4px 0 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-field {
+  width: 180px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 1099.98px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+h2 {
+  margin: 0;
+  font: var(--mat-sys-title-medium);
+}
+
+mat-card-content {
+  padding-top: 12px;
+}
+
+.details {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0;
+}
+
+.details dt {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.details dd {
+  margin: 0;
+}
+
+.details a,
+.timeline a {
+  color: var(--mat-sys-primary);
+}
+
+.break {
+  overflow-wrap: anywhere;
+}
+
+.small {
+  font: var(--mat-sys-body-small);
+}
+
+.message {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.note-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.note-form mat-form-field {
+  width: 100%;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timeline li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-low);
+}
+
+.timeline li.system {
+  background: transparent;
+  border: 1px dashed var(--mat-sys-outline-variant);
+}
+
+.kind-icon {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.note-meta {
+  font: var(--mat-sys-label-medium);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.note-body p {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.empty {
+  color: var(--mat-sys-on-surface-variant);
+}
