@@ -1,0 +1,107 @@
+<header class="page-header">
+  <h1>Integración</h1>
+</header>
+
+<p class="lead">
+  Conecta tus webs para que los leads lleguen aquí. La <strong>fuente</strong> identifica de dónde
+  viene cada lead (una landing, una campaña…) y sirve para filtrar el listado y el resumen.
+</p>
+
+@if (!privacyPolicyUrl()) {
+  <div class="warning" role="note">
+    <mat-icon aria-hidden="true">warning</mat-icon>
+    <span>
+      No hay política de privacidad configurada: el formulario la menciona sin enlace. Define
+      <code>PRIVACY_POLICY_URL</code> y <code>PRIVACY_POLICY_VERSION</code> en el servidor.
+    </span>
+  </div>
+}
+
+<mat-form-field appearance="outline" class="source-field">
+  <mat-label>Fuente</mat-label>
+  <input
+    matInput
+    #sourceInput
+    [value]="source()"
+    (input)="source.set(sourceInput.value)"
+    maxlength="100"
+  />
+  <mat-hint>Por ejemplo, landing-verano o web-principal</mat-hint>
+</mat-form-field>
+
+<div class="cards">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title><h2>Enlace directo</h2></mat-card-title>
+      <mat-card-subtitle>Para emails, redes sociales o un botón «Contactar»</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <pre tabindex="0" aria-label="Enlace al formulario"><code>{{ url() }}</code></pre>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button type="button" (click)="copy(url(), 'Enlace')">
+        <mat-icon aria-hidden="true">content_copy</mat-icon>
+        Copiar enlace
+      </button>
+      <a mat-button [href]="url()" target="_blank" rel="noopener">
+        <mat-icon aria-hidden="true">open_in_new</mat-icon>
+        Abrir formulario
+        <span class="visually-hidden">(se abre en una pestaña nueva)</span>
+      </a>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title><h2>Formulario incrustado</h2></mat-card-title>
+      <mat-card-subtitle
+        >Pega este código en tu landing donde quieras el formulario</mat-card-subtitle
+      >
+    </mat-card-header>
+    <mat-card-content>
+      <pre
+        tabindex="0"
+        aria-label="Código para incrustar el formulario"
+      ><code>{{ embed() }}</code></pre>
+      <p class="help">
+        Envía con el lead la URL de la página y sus parámetros <code>utm_*</code>, y ajusta la
+        altura al formulario.
+      </p>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button type="button" (click)="copy(embed(), 'Código')">
+        <mat-icon aria-hidden="true">content_copy</mat-icon>
+        Copiar código
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title><h2>API</h2></mat-card-title>
+      <mat-card-subtitle>Para desarrolladores con su propio formulario o backend</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <pre tabindex="0" aria-label="Ejemplo de petición a la API"><code>{{ api() }}</code></pre>
+      <ul class="help">
+        <li>
+          <code>name</code>, <code>email</code> y <code>consent: true</code> son obligatorios.
+        </li>
+        <li>
+          Incluye un campo oculto <code>website</code> vacío: si un bot lo rellena, el lead se
+          descarta.
+        </li>
+        <li>
+          Desde el navegador, solo los dominios de <code>CORS_ORIGINS</code> del backend pueden
+          llamar a la API. Si no, usa el formulario incrustado.
+        </li>
+      </ul>
+    </mat-card-content>
+    <mat-card-actions>
+      <button mat-button type="button" (click)="copy(api(), 'Ejemplo')">
+        <mat-icon aria-hidden="true">content_copy</mat-icon>
+        Copiar ejemplo
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

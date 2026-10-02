@@ -48,6 +48,7 @@ export class Shell {
   protected readonly navItems = [
     { path: '/dashboard', icon: 'dashboard', label: 'Resumen' },
     { path: '/leads', icon: 'group', label: 'Leads' },
+    { path: '/integration', icon: 'code', label: 'Integración' },
   ];
 
   protected changePassword(): void {

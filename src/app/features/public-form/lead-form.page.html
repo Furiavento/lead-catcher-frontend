@@ -1,0 +1,119 @@
+<main class="capture">
+  @if (sent()) {
+    <section class="sent">
+      <h1 #sentHeading tabindex="-1">¡Gracias!</h1>
+      <p>Hemos recibido tus datos. Te contactaremos pronto.</p>
+    </section>
+  } @else {
+    <h1>Contacto</h1>
+    <p class="intro">Déjanos tus datos y te contactaremos.</p>
+
+    <form [formRoot]="leadForm" novalidate>
+      <p class="note">Los campos con asterisco (*) son obligatorios.</p>
+
+      <div class="field">
+        <label for="lead-name">Nombre <span aria-hidden="true">*</span></label>
+        <input
+          id="lead-name"
+          autocomplete="name"
+          [formField]="leadForm.name"
+          [attr.aria-invalid]="errorOf(leadForm.name) ? true : null"
+          aria-describedby="lead-name-error"
+        />
+        <p id="lead-name-error" class="field-error">{{ errorOf(leadForm.name) }}</p>
+      </div>
+
+      <div class="field">
+        <label for="lead-email">Email <span aria-hidden="true">*</span></label>
+        <input
+          id="lead-email"
+          type="email"
+          autocomplete="email"
+          [formField]="leadForm.email"
+          [attr.aria-invalid]="errorOf(leadForm.email) ? true : null"
+          aria-describedby="lead-email-error"
+        />
+        <p id="lead-email-error" class="field-error">{{ errorOf(leadForm.email) }}</p>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="lead-phone">Teléfono</label>
+          <input
+            id="lead-phone"
+            type="tel"
+            autocomplete="tel"
+            [formField]="leadForm.phone"
+            [attr.aria-invalid]="errorOf(leadForm.phone) ? true : null"
+            aria-describedby="lead-phone-error"
+          />
+          <p id="lead-phone-error" class="field-error">{{ errorOf(leadForm.phone) }}</p>
+        </div>
+
+        <div class="field">
+          <label for="lead-company">Empresa</label>
+          <input
+            id="lead-company"
+            autocomplete="organization"
+            [formField]="leadForm.company"
+            [attr.aria-invalid]="errorOf(leadForm.company) ? true : null"
+            aria-describedby="lead-company-error"
+          />
+          <p id="lead-company-error" class="field-error">{{ errorOf(leadForm.company) }}</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lead-message">Mensaje</label>
+        <textarea
+          id="lead-message"
+          rows="4"
+          [formField]="leadForm.message"
+          [attr.aria-invalid]="errorOf(leadForm.message) ? true : null"
+          aria-describedby="lead-message-error"
+        ></textarea>
+        <p id="lead-message-error" class="field-error">{{ errorOf(leadForm.message) }}</p>
+      </div>
+
+      <!-- Honeypot: out of sight and out of the accessibility tree. -->
+      <div class="honeypot" aria-hidden="true">
+        <label for="lead-website">Web</label>
+        <input id="lead-website" tabindex="-1" autocomplete="off" [formField]="leadForm.website" />
+      </div>
+
+      <div class="consent">
+        <input
+          id="lead-consent"
+          type="checkbox"
+          [formField]="leadForm.consent"
+          [attr.aria-invalid]="errorOf(leadForm.consent) ? true : null"
+          aria-describedby="lead-consent-error"
+        />
+        <label for="lead-consent">
+          He leído y acepto la
+          @if (privacyPolicyUrl(); as url) {
+            <a [href]="url" target="_blank" rel="noopener noreferrer"
+              >política de privacidad<span class="visually-hidden">
+                (se abre en una pestaña nueva)</span
+              ></a
+            >
+          } @else {
+            política de privacidad
+          }
+          <span aria-hidden="true">*</span>
+        </label>
+      </div>
+      <p id="lead-consent-error" class="field-error">{{ errorOf(leadForm.consent) }}</p>
+
+      <div class="form-error" role="alert">
+        @if (leadForm().errors()[0]; as err) {
+          {{ err.message }}
+        }
+      </div>
+
+      <button type="submit" [disabled]="!ready() || leadForm().submitting()">
+        {{ leadForm().submitting() ? 'Enviando…' : 'Enviar' }}
+      </button>
+    </form>
+  }
+</main>

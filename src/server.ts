@@ -6,6 +6,7 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
+import { runtimeConfigFromEnv } from './app/core/config/runtime-config';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -18,7 +19,29 @@ const angularApp = new AngularNodeAppEngine();
  */
 app.get('/config.json', (_req, res) => {
   res.set('Cache-Control', 'no-store');
-  res.json({ apiUrl: process.env['API_URL'] || 'http://localhost:3000/api' });
+  res.json(runtimeConfigFromEnv(process.env));
+});
+
+/**
+ * Only the public lead form (/f/...) can be embedded in an iframe, by the
+ * origins in FORM_FRAME_ANCESTORS (comma-separated, any by default). The admin
+ * panel can't be framed, which prevents clickjacking.
+ */
+const formFrameAncestors =
+  (process.env['FORM_FRAME_ANCESTORS'] ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .join(' ') || '*';
+
+app.use((req, res, next) => {
+  if (req.path.startsWith('/f/')) {
+    res.set('Content-Security-Policy', `frame-ancestors ${formFrameAncestors}`);
+  } else {
+    res.set('Content-Security-Policy', "frame-ancestors 'none'");
+    res.set('X-Frame-Options', 'DENY');
+  }
+  next();
 });
 
 /**

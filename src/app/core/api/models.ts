@@ -14,6 +14,7 @@ export type LeadStats = Schemas['LeadStatsDto'];
 export type DailyCount = Schemas['DailyCountDto'];
 export type SourceCount = Schemas['SourceCountDto'];
 export type UpdateLeadRequest = Schemas['UpdateLeadDto'];
+export type CreateLeadRequest = Schemas['CreateLeadDto'];
 export type LoginResponse = Schemas['LoginResponseDto'];
 export type CurrentUser = Schemas['MeResponseDto'];
 

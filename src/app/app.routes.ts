@@ -9,6 +9,13 @@ export const routes: Routes = [
     loadComponent: () => import('./features/login/login.page').then((m) => m.LoginPage),
   },
   {
+    // Public lead form, rendered on the server (see app.routes.server.ts).
+    path: 'f/:source',
+    title: 'Contacto',
+    loadComponent: () =>
+      import('./features/public-form/lead-form.page').then((m) => m.LeadFormPage),
+  },
+  {
     path: '',
     canActivate: [authGuard],
     loadComponent: () => import('./features/layout/shell').then((m) => m.Shell),
@@ -31,6 +38,12 @@ export const routes: Routes = [
         title: 'Detalle del lead · Lead Catcher',
         loadComponent: () =>
           import('./features/leads/lead-detail.page').then((m) => m.LeadDetailPage),
+      },
+      {
+        path: 'integration',
+        title: 'Integración · Lead Catcher',
+        loadComponent: () =>
+          import('./features/integration/integration.page').then((m) => m.IntegrationPage),
       },
     ],
   },

@@ -1,0 +1,139 @@
+:host {
+  display: block;
+}
+
+.capture {
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  box-sizing: border-box;
+}
+
+h1 {
+  margin: 0 0 4px;
+  font: var(--mat-sys-headline-small);
+}
+
+h1:focus {
+  outline: none;
+}
+
+.intro,
+.note {
+  margin: 0 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.note {
+  font: var(--mat-sys-body-small);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  column-gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+label {
+  font: var(--mat-sys-label-large);
+}
+
+input:not([type='checkbox']),
+textarea {
+  font: var(--mat-sys-body-large);
+  color: var(--mat-sys-on-surface);
+  background: var(--mat-sys-surface);
+  border: 1px solid var(--mat-sys-outline);
+  border-radius: 4px;
+  padding: 10px 12px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 2px;
+}
+
+[aria-invalid='true'] {
+  border-color: var(--mat-sys-error);
+}
+
+.field-error {
+  min-height: 1.25rem;
+  margin: 0 0 4px;
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-error);
+}
+
+.consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.consent input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--mat-sys-primary);
+}
+
+.consent label {
+  font: var(--mat-sys-body-medium);
+}
+
+a {
+  color: var(--mat-sys-primary);
+}
+
+.form-error {
+  margin-bottom: 12px;
+  color: var(--mat-sys-error);
+}
+
+.form-error:empty {
+  margin: 0;
+}
+
+button {
+  width: 100%;
+  padding: 12px 24px;
+  border: 0;
+  border-radius: 20px;
+  font: var(--mat-sys-label-large);
+  color: var(--mat-sys-on-primary);
+  background: var(--mat-sys-primary);
+  cursor: pointer;
+}
+
+button:disabled {
+  color: color-mix(in srgb, var(--mat-sys-on-surface) 60%, transparent);
+  background: color-mix(in srgb, var(--mat-sys-on-surface) 12%, transparent);
+  cursor: default;
+}
+
+/* Off screen rather than display: none, which some bots detect. */
+.honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.sent {
+  padding: 32px 0;
+  text-align: center;
+}
